@@ -1,9 +1,6 @@
 package com.company.models;
 
-import com.company.helperClasses.CONSTANTS;
-import com.company.helperClasses.ProductCategory;
-import com.company.helperClasses.ReceiptsFileSaver;
-import com.company.helperClasses.ReportsFileSaver;
+import com.company.helperClasses.*;
 
 import java.io.File;
 import java.io.Serializable;
@@ -11,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.BlockingQueue;
 
 public class Supermarket implements Serializable {
     private String name;
@@ -105,6 +103,8 @@ public class Supermarket implements Serializable {
                 + receipt.getSupermarket().getName()
                 + CONSTANTS.pathToStoreReceiptsDirectories
                 + receipt.getId() + CONSTANTS.TXT);
+
+        ReceiptsFileSaver.saveAsFileHtml(receipt);
     }
 
 
@@ -155,19 +155,32 @@ public class Supermarket implements Serializable {
     }
 
     // methods for cashDesks start
-    public void processClients(List<Client> clients) {
+
+    // works with 2 cash desks only
+    public void processClientsBasic(BlockingQueue<Client> clients) {
         // TODO make it work with different number of clients and cashDesks
-        int numberOfCashDesks = this.cashDesks.size();
         Thread thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
-                cashDesks.get(0).takeClient(clients.get(0));
+                while(!clients.isEmpty()) {
+                    try {
+                        cashDesks.get(0).takeClient(clients.take());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
         Thread thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
-                cashDesks.get(1).takeClient(clients.get(1));
+                while(!clients.isEmpty()) {
+                    try {
+                        cashDesks.get(1).takeClient(clients.take());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         });
 
@@ -179,6 +192,41 @@ public class Supermarket implements Serializable {
             thread2.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        }
+
+        System.out.println("All clients have been served!");
+    }
+
+    public void processClients(BlockingQueue<Client> clients) {
+        // TODO make it work with different number of clients and cashDesks
+        int numberOfCashDesks = this.cashDesks.size();
+        List<Thread> threads = new ArrayList<>();
+        for (int i = 0; i < numberOfCashDesks; i++) {
+            int cashDeskIndex = i;
+            threads.add(new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while(!clients.isEmpty()) {
+                        try {
+                            cashDesks.get(cashDeskIndex).takeClient(clients.take());
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }));
+        }
+
+        for (int i = 0; i < numberOfCashDesks; i++) {
+            threads.get(i).start();
+        }
+
+        for (int i = 0; i < numberOfCashDesks; i++) {
+            try {
+                threads.get(i).join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
         System.out.println("All clients have been served!");
