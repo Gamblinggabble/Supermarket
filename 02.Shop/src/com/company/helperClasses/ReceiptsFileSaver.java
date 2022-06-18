@@ -3,10 +3,6 @@ package com.company.helperClasses;
 import com.company.models.Receipt;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class ReceiptsFileSaver implements ReceiptsSaver {
@@ -14,17 +10,27 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
     public static void saveAsFileTxt(Receipt receipt) {
         String filePath = CONSTANTS.pathToStoresDirectories + receipt.getSupermarket().getName() + CONSTANTS.pathToStoreReceiptsDirectories + "\\" + receipt.getId() + CONSTANTS.TXT;
 
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(getFormattedReceipt(receipt));
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(getFormattedReceiptTxt(receipt, "-"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void saveAsFileHtml(Receipt receipt) {
+        String filePath = CONSTANTS.pathToStoresDirectories + receipt.getSupermarket().getName() + CONSTANTS.pathToStoreReceiptsDirectories + "\\" + receipt.getId() + ".html";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(getFormattedReceiptHtml(receipt));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static void readFromFileTxt(String filePath) {
-        try(BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 System.out.println(line);
             }
         } catch (IOException e) {
@@ -60,9 +66,9 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
         return receipt;
     }
 
-    private static String getFormattedReceipt(Receipt receipt) {
-        final String fill = new String(new char[40]).replace("\0", "-") + "\n";
+    private static String getFormattedReceiptTxt(Receipt receipt, String divider) {
         final int fullLength = 40;
+        final String fill = new String(new char[fullLength]).replace("\0", divider) + "\n";
         StringBuilder sb = new StringBuilder();
         // Касовата бележка трябва да съдържат минимум следната информация: пореден номер,
         // касиер, който издава касовата бележка, дата и час на издаване на касовата бележка, списък със
@@ -71,25 +77,25 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
 
         // header
         sb.append("\n\n");
-        sb.append( new String(new char[(fullLength-"RECEIPT FROM".length())/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - "RECEIPT FROM".length()) / 2]).replace("\0", " "));
         sb.append("RECEIPT FROM");
-        sb.append( new String(new char[(fullLength-"RECEIPT FROM".length())/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - "RECEIPT FROM".length()) / 2]).replace("\0", " "));
         sb.append("\n");
         int nameLength = receipt.getSupermarket().getName().length();
-        sb.append( new String(new char[(fullLength-nameLength)/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - nameLength) / 2]).replace("\0", " "));
         sb.append(receipt.getSupermarket().getName().toUpperCase(Locale.ROOT));
-        sb.append( new String(new char[(fullLength-nameLength)/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - nameLength) / 2]).replace("\0", " "));
         sb.append("\n\n");
         sb.append(fill);
 
         // meta data
         String idMetadata = "Receipt Nr. " + receipt.getId();
-        sb.append( new String(new char[(fullLength-idMetadata.length())/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - idMetadata.length()) / 2]).replace("\0", " "));
         sb.append(idMetadata);
-        sb.append( new String(new char[(fullLength-idMetadata.length())/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - idMetadata.length()) / 2]).replace("\0", " "));
         sb.append("\n");
         String date = String.format("%10s%02d/%02d/%4d  %02d:%02d:%02d%10s", " ", receipt.getDate().getDayOfMonth(), receipt.getDate().getMonthValue(), receipt.getDate().getYear()
-                                                                , receipt.getDate().getHour(), receipt.getDate().getMinute(), receipt.getDate().getSecond(), " ");
+                , receipt.getDate().getHour(), receipt.getDate().getMinute(), receipt.getDate().getSecond(), " ");
         sb.append(date);
         sb.append("\n");
         sb.append(fill);
@@ -111,9 +117,9 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
         // footer
         String servedBy = "You have been served by " + receipt.getCashier().getName().split(" ")[0];
         int servedByLength = (servedBy).length();
-        sb.append(new String(new char[(fullLength - servedByLength)/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - servedByLength) / 2]).replace("\0", " "));
         sb.append(servedBy);
-        sb.append(new String(new char[(fullLength - servedByLength)/2]).replace("\0", " "));
+        sb.append(new String(new char[(fullLength - servedByLength) / 2]).replace("\0", " "));
         sb.append("\n");
         sb.append(fill);
         sb.append("\n");
@@ -121,6 +127,68 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
         sb.append("THANK YOU!");
         sb.append(new String(new char[15]).replace("\0", " "));
         sb.append("\n\n");
+
+        return sb.toString();
+    }
+
+    private static String getFormattedReceiptHtml(Receipt receipt) {
+        final String fill = new String(new char[40]).replace("\0", "-") + "<br>";
+        StringBuilder sb = new StringBuilder();
+        // Касовата бележка трябва да съдържат минимум следната информация: пореден номер,
+        // касиер, който издава касовата бележка, дата и час на издаване на касовата бележка, списък със
+        // стоки, които се включват в касовата бележка включително цената и количеството им и общата
+        // стойност, която трябва да се заплати от клиента.
+
+        sb.append("<p style=text-align:center;>");
+        // header
+        sb.append("<br><br>");
+        sb.append("RECEIPT FROM");
+        sb.append("<br>");
+        int nameLength = receipt.getSupermarket().getName().length();
+        sb.append(receipt.getSupermarket().getName().toUpperCase(Locale.ROOT));
+        sb.append("<br><br>");
+        sb.append(fill);
+
+        // meta data
+        String idMetadata = "Receipt Nr. " + receipt.getId();
+        sb.append(idMetadata);
+        sb.append("<br>");
+        String date = String.format("%02d/%02d/%4d  %02d:%02d:%02d", receipt.getDate().getDayOfMonth(), receipt.getDate().getMonthValue(), receipt.getDate().getYear()
+                , receipt.getDate().getHour(), receipt.getDate().getMinute(), receipt.getDate().getSecond());
+        sb.append(date);
+        sb.append("<br>");
+        sb.append(fill);
+        sb.append("<br>");
+
+        //TODO could eventually add "ITEM     QTY PRC"
+
+        // products
+        for (var product : receipt.getProductList().keySet()) {
+            sb.append(String.format("%-20s %10dx %7.2f", product.getName(), receipt.getProductList().get(product).getFirst(), receipt.getProductList().get(product).getSecond()));
+            sb.append("<br>");
+        }
+        sb.append("<br>");
+        sb.append(String.format("TOTAL:  %32.2f", receipt.getTotalSum()));
+        sb.append("<br>");
+        sb.append(fill);
+        // TODO could eventually add "CASH", "CHANGE"
+
+        // footer
+        String servedBy = "You have been served by " + receipt.getCashier().getName().split(" ")[0];
+        sb.append(servedBy);
+        sb.append("<br>");
+        sb.append(fill);
+        sb.append("<br>");
+
+        // QR code
+        sb.append("<img " + "src=" + "\"https://barcode.tec-it.com/barcode.ashx?code=MobileQRCode&data=" + getFormattedReceiptTxt(receipt, "*") + "\" >");
+        sb.append("<br><br>");
+
+        // continued footer
+        sb.append("THANK YOU!");
+
+        sb.append("</p>");
+
 
         return sb.toString();
     }
