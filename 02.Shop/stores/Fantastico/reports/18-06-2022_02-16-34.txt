@@ -1,0 +1,19 @@
+
+
+               REPORT FOR               
+               FANTASTICO               
+
+----------------------------------------
+          18/06/2022 02:16:34          
+----------------------------------------
+
+Expenses                     -3015,00
+   salaries expenses            -2100,00
+   deliveries costs              -915,00
+Income                        +111,10
+   food products income          +105,60
+   non-food products income        +0,00
+
+
+FINAL SUM:                      -2903,90
+----------------------------------------
