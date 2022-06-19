@@ -1,5 +1,6 @@
 package com.company.models;
 
+import com.company.exceptions.ExpiredProductException;
 import com.company.helperClasses.ProductCategory;
 
 import java.io.Serializable;
@@ -11,9 +12,6 @@ import java.util.Map.Entry;
 
 public class Product implements Serializable {
 
-    //  В магазина се зареждат стоки, които ще се продават. Всяка стока се определя от
-    // идентификационен номер, име, единична доставна цена и категория (хранителни и
-    // нехранителни стоки). Освен това всяка стока има дата на изтичане на срока на годност.
     private int id;
     private String name;
     private BigDecimal initialPrice;
@@ -28,18 +26,13 @@ public class Product implements Serializable {
         this.expiryDate = expiryDate;
     }
 
-    // Продажната цена на стоката се определя по следния начин:
-    // 1. Хранителните и нехранителните стоки имат различен % надценка, който се определя в магазина.
-    // 2. Ако срокът на годност наближава, т.е. остават по-малко от даден брой дни до
-    // изтичането му, продажната цена на стоката се намалява с определен %. Броят на дните до
-    // изтичането на срока и % намаление са различни за всеки магазин.
-    // 3. Стоки с изтекъл срок на годност не трябва да се продават.
-    public BigDecimal sellPrice(Map<ProductCategory, Double> percentsByCategory, Entry<Integer, Double> expiryDiscounts) {
+    public BigDecimal sellPrice(Map<ProductCategory, Double> percentsByCategory, Entry<Integer, Double> expiryDiscounts) throws ExpiredProductException {
+        if (this.daysBeforeExpiry() <= 0) throw new ExpiredProductException(this.daysBeforeExpiry() * -1);
         BigDecimal calculatedPrice = initialPrice;
         BigDecimal additional = initialPrice.multiply(BigDecimal.valueOf(percentsByCategory.get(this.category)));
         calculatedPrice = calculatedPrice.add(additional);
 
-        if (daysBeforeExpiry() <= expiryDiscounts.getKey()) {
+        if (this.daysBeforeExpiry() <= expiryDiscounts.getKey()) {
             BigDecimal discount = calculatedPrice.multiply(BigDecimal.valueOf(expiryDiscounts.getValue()));
             calculatedPrice = calculatedPrice.subtract(discount);
         }

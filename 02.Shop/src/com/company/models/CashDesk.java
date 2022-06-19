@@ -1,5 +1,7 @@
 package com.company.models;
 
+import com.company.exceptions.ExpiredProductException;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,6 +27,8 @@ public class CashDesk implements Serializable {
                     this.scanProduct(product, client.getProductList().get(product), receipt);
                 } else
                     throw new IllegalArgumentException("No sufficient funds to buy " + client.getProductList().get(product) + " " + product.getName());
+            } catch (ExpiredProductException e) {
+                e.printStackTrace();
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             }

@@ -67,7 +67,7 @@ public class ReportsFileSaver {
         // report data
         sb.append(ReportsFileSaver.formatReportDateLine("Expenses", '-', supermarket.salariesForAMonth().add(supermarket.deliveriesCost()), fullLength - 3));
         sb.append(ReportsFileSaver.formatReportDateLine("   salaries expenses", '-', supermarket.salariesForAMonth(), fullLength));
-        sb.append(ReportsFileSaver.formatReportDateLine("   deliveries costs", '-', supermarket.deliveriesCost(), fullLength));
+        sb.append(ReportsFileSaver.formatReportDateLine("   products costs", '-', supermarket.deliveriesCost(), fullLength));
         sb.append(ReportsFileSaver.formatReportDateLine("Income", '+', supermarket.incomeSoldProducts(), fullLength - 3));
         sb.append(ReportsFileSaver.formatReportDateLine("   food products income", '+', supermarket.incomeSoldProductsByCategory(ProductCategory.FOOD), fullLength));
         sb.append(ReportsFileSaver.formatReportDateLine("   non-food products income", '+', supermarket.incomeSoldProductsByCategory(ProductCategory.NON_FOOD), fullLength));

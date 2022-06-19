@@ -1,5 +1,6 @@
 package com.company.models;
 
+import com.company.exceptions.ExpiredProductException;
 import com.company.helperClasses.*;
 
 import java.io.File;
@@ -35,9 +36,11 @@ public class Supermarket implements Serializable {
         this.receipts = new ArrayList<>();
         this.receiptsCnt = 0;
 
-        // create a directory for the store, receipts and reports
+        // create a directory for the store
         new File(CONSTANTS.pathToStoresDirectories + this.name).mkdirs();
+        //  receipts folder
         new File(CONSTANTS.pathToStoresDirectories + this.name + CONSTANTS.pathToStoreReceiptsDirectories).mkdirs();
+        //  reports folder
         new File(CONSTANTS.pathToStoresDirectories + this.name + CONSTANTS.pathToStoreReportsDirectories).mkdirs();
     }
 
@@ -148,8 +151,13 @@ public class Supermarket implements Serializable {
     public BigDecimal incomeSoldProductsByCategory(ProductCategory category) {
         BigDecimal sum = BigDecimal.valueOf(0);
         for (Map.Entry<Product, Integer> entry : productsSold.entrySet()) {
-            if (entry.getKey().getCategory() == category)
-                sum = sum.add(entry.getKey().sellPrice(percentAddedByCategory, daysBeforeExpiryDiscount).multiply(BigDecimal.valueOf(entry.getValue())));
+            if (entry.getKey().getCategory() == category) {
+                try {
+                    sum = sum.add(entry.getKey().sellPrice(percentAddedByCategory, daysBeforeExpiryDiscount).multiply(BigDecimal.valueOf(entry.getValue())));
+                } catch (ExpiredProductException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         return sum;
     }
@@ -198,7 +206,6 @@ public class Supermarket implements Serializable {
     }
 
     public void processClients(BlockingQueue<Client> clients) {
-        // TODO make it work with different number of clients and cashDesks
         int numberOfCashDesks = this.cashDesks.size();
         List<Thread> threads = new ArrayList<>();
         for (int i = 0; i < numberOfCashDesks; i++) {

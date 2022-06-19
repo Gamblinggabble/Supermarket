@@ -1,5 +1,6 @@
 package com.company.models;
 
+import com.company.exceptions.ExpiredProductException;
 import com.company.helperClasses.Pair;
 
 import java.io.Serializable;
@@ -28,15 +29,19 @@ public class Receipt implements Serializable {
     }
 
     public void addProduct(Product product, Integer quantity) {
-        if(!productList.containsKey(product))
-            productList.put(product, new Pair<>(quantity, product.sellPrice(supermarket.getPercentAddedByCategory(), supermarket.getDaysBeforeExpiryForDiscount())));
-        else{
-            int initialQuantity = productList.get(product).getFirst();
-            BigDecimal sellPrice = productList.get(product).getSecond();
-            productList.put(product, new Pair<>(initialQuantity + quantity, sellPrice));
+        try {
+            if (!productList.containsKey(product))
+                productList.put(product, new Pair<>(quantity, product.sellPrice(supermarket.getPercentAddedByCategory(), supermarket.getDaysBeforeExpiryForDiscount())));
+            else {
+                int initialQuantity = productList.get(product).getFirst();
+                BigDecimal sellPrice = productList.get(product).getSecond();
+                productList.put(product, new Pair<>(initialQuantity + quantity, sellPrice));
+            }
+            BigDecimal price = product.sellPrice(supermarket.getPercentAddedByCategory(), supermarket.getDaysBeforeExpiryForDiscount()).multiply(BigDecimal.valueOf(quantity));
+            totalSum = totalSum.add(price);
+        } catch (ExpiredProductException e) {
+            e.printStackTrace();
         }
-        BigDecimal price = product.sellPrice(supermarket.getPercentAddedByCategory(), supermarket.getDaysBeforeExpiryForDiscount()).multiply(BigDecimal.valueOf(quantity));
-        totalSum = totalSum.add(price);
     }
 
     public BigDecimal getTotalSum() {
