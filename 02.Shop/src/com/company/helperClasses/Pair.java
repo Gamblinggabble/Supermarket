@@ -1,16 +1,15 @@
 package com.company.helperClasses;
 
-import java.io.Serializable;
 import java.util.Objects;
 
-public class Pair<F, S> implements Serializable {
+public class Pair<F, S> {
 
     private final F first;
     private final S second;
 
     public Pair(F first, S second) {
-        if(first.equals(null)) throw new IllegalArgumentException();
-        if(second.equals(null)) throw new IllegalArgumentException();
+        if (first.equals(null)) throw new IllegalArgumentException();
+        if (second.equals(null)) throw new IllegalArgumentException();
 
         this.first = first;
         this.second = second;

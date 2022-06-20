@@ -5,10 +5,11 @@ import com.company.models.Receipt;
 import java.io.*;
 import java.util.Locale;
 
-public class ReceiptsFileSaver implements ReceiptsSaver {
+public class ReceiptsFileSaver {
 
+    // .TXT
     public static void saveAsFileTxt(Receipt receipt) {
-        String filePath = CONSTANTS.pathToStoresDirectories + receipt.getSupermarket().getName() + CONSTANTS.pathToStoreReceiptsDirectories + "\\" + receipt.getId() + CONSTANTS.TXT;
+        String filePath = CONFIG.PATH_TO_STORES_DIR + receipt.getSupermarket().getName() + CONFIG.PATH_TO_RECEIPTS_DIR + "\\" + receipt.getId() + CONFIG.TXT;
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(getFormattedReceiptTxt(receipt, "-"));
@@ -17,17 +18,7 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
         }
     }
 
-    public static void saveAsFileHtml(Receipt receipt) {
-        String filePath = CONSTANTS.pathToStoresDirectories + receipt.getSupermarket().getName() + CONSTANTS.pathToStoreReceiptsDirectories + "\\" + receipt.getId() + ".html";
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(getFormattedReceiptHtml(receipt));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void readFromFileTxt(String filePath) {
+    public synchronized static void readFromFileTxt(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -38,8 +29,20 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
         }
     }
 
+    // .HTML
+    public static void saveAsFileHtml(Receipt receipt) {
+        String filePath = CONFIG.PATH_TO_STORES_DIR + receipt.getSupermarket().getName() + CONFIG.PATH_TO_RECEIPTS_DIR + "\\" + receipt.getId() + ".html";
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write(getFormattedReceiptHtml(receipt));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // .SER
     public static void saveAsFileSer(Receipt receipt) {
-        String filePath = CONSTANTS.pathToStoresDirectories + receipt.getSupermarket().getName() + CONSTANTS.pathToStoreReceiptsDirectories + receipt.getId() + CONSTANTS.SER;
+        String filePath = CONFIG.PATH_TO_STORES_DIR + receipt.getSupermarket().getName() + CONFIG.PATH_TO_RECEIPTS_DIR + receipt.getId() + CONFIG.SER;
 
         try (FileOutputStream fout = new FileOutputStream(filePath); ObjectOutputStream outputStream = new ObjectOutputStream(fout);) {
             outputStream.writeObject(receipt);
@@ -66,6 +69,7 @@ public class ReceiptsFileSaver implements ReceiptsSaver {
         return receipt;
     }
 
+    // formatters
     private static String getFormattedReceiptTxt(Receipt receipt, String divider) {
         final int fullLength = 40;
 

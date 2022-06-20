@@ -3,13 +3,13 @@ package com.company.models;
 import com.company.exceptions.ExpiredProductException;
 import com.company.helperClasses.Pair;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Receipt implements Serializable {
+public class Receipt {
+
     private static final long serialVersionUUID = 1;
     private int id;
     private Cashier cashier;

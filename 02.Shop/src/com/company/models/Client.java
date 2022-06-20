@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Client {
+
     private BigDecimal cash;
     private Map<Product, Integer> productList;
 

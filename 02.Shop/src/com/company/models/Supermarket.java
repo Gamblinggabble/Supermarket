@@ -1,17 +1,23 @@
 package com.company.models;
 
 import com.company.exceptions.ExpiredProductException;
-import com.company.helperClasses.*;
+import com.company.helperClasses.CONFIG;
+import com.company.helperClasses.ProductCategory;
+import com.company.helperClasses.ReceiptsFileSaver;
+import com.company.helperClasses.ReportsFileSaver;
 
 import java.io.File;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.BlockingQueue;
 
-public class Supermarket implements Serializable {
+public class Supermarket {
+
     private String name;
     private Map<Product, Integer> productsDelivered;
     private Map<Product, Integer> productsInventory;
@@ -37,11 +43,11 @@ public class Supermarket implements Serializable {
         this.receiptsCnt = 0;
 
         // create a directory for the store
-        new File(CONSTANTS.pathToStoresDirectories + this.name).mkdirs();
+        new File(CONFIG.PATH_TO_STORES_DIR + this.name).mkdirs();
         //  receipts folder
-        new File(CONSTANTS.pathToStoresDirectories + this.name + CONSTANTS.pathToStoreReceiptsDirectories).mkdirs();
+        new File(CONFIG.PATH_TO_STORES_DIR + this.name + CONFIG.PATH_TO_RECEIPTS_DIR).mkdirs();
         //  reports folder
-        new File(CONSTANTS.pathToStoresDirectories + this.name + CONSTANTS.pathToStoreReportsDirectories).mkdirs();
+        new File(CONFIG.PATH_TO_STORES_DIR + this.name + CONFIG.PATH_TO_REPORTS_DIR).mkdirs();
     }
 
     public String getName() {
@@ -79,6 +85,8 @@ public class Supermarket implements Serializable {
     }
 
     public void addProductToInventory(Product product, int quantity) {
+        if (quantity <= 0) throw new IllegalArgumentException("Quantity of products added must be a positive number.");
+
         // put in delivered list
         if (!productsDelivered.containsKey(product)) {
             productsDelivered.put(product, quantity);
@@ -99,13 +107,12 @@ public class Supermarket implements Serializable {
     public void addReceipt(Receipt receipt) {
         this.receipts.add(receipt);
 
-        // TODO create custom serialization for receipt's productList in order for the serialization to work
         //ReceiptsFileSaver.saveAsFileSer(receipt);
         ReceiptsFileSaver.saveAsFileTxt(receipt);
-        ReceiptsFileSaver.readFromFileTxt(CONSTANTS.pathToStoresDirectories
+        ReceiptsFileSaver.readFromFileTxt(CONFIG.PATH_TO_STORES_DIR
                 + receipt.getSupermarket().getName()
-                + CONSTANTS.pathToStoreReceiptsDirectories
-                + receipt.getId() + CONSTANTS.TXT);
+                + CONFIG.PATH_TO_RECEIPTS_DIR
+                + receipt.getId() + CONFIG.TXT);
 
         ReceiptsFileSaver.saveAsFileHtml(receipt);
     }
@@ -162,6 +169,7 @@ public class Supermarket implements Serializable {
         return sum;
     }
 
+
     // methods for cashDesks start
 
     // works with 2 cash desks only
@@ -170,7 +178,7 @@ public class Supermarket implements Serializable {
         Thread thread1 = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!clients.isEmpty()) {
+                while (!clients.isEmpty()) {
                     try {
                         cashDesks.get(0).takeClient(clients.take());
                     } catch (InterruptedException e) {
@@ -182,7 +190,7 @@ public class Supermarket implements Serializable {
         Thread thread2 = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(!clients.isEmpty()) {
+                while (!clients.isEmpty()) {
                     try {
                         cashDesks.get(1).takeClient(clients.take());
                     } catch (InterruptedException e) {
@@ -195,7 +203,7 @@ public class Supermarket implements Serializable {
         thread1.start();
         thread2.start();
 
-        try{
+        try {
             thread1.join();
             thread2.join();
         } catch (InterruptedException e) {
@@ -213,7 +221,7 @@ public class Supermarket implements Serializable {
             threads.add(new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    while(!clients.isEmpty()) {
+                    while (!clients.isEmpty()) {
                         try {
                             cashDesks.get(cashDeskIndex).takeClient(clients.take());
                         } catch (InterruptedException e) {

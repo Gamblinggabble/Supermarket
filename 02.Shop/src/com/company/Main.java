@@ -43,7 +43,7 @@ public class Main {
             client2.addProductToCart(hummus5, 5);
         }
 
-        Client client3 = new Client(BigDecimal.valueOf(10000));
+        Client client3 = new Client(BigDecimal.valueOf(1000));
         client3.addProductToCart(shampoo, 1);
 
         BlockingQueue<Client> clients = new ArrayBlockingQueue<>(3);

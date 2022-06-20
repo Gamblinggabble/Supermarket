@@ -2,11 +2,11 @@ package com.company.models;
 
 import com.company.exceptions.ExpiredProductException;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class CashDesk implements Serializable {
+public class CashDesk {
+
     private Cashier cashier;
     private Supermarket supermarket;
 
@@ -30,7 +30,8 @@ public class CashDesk implements Serializable {
             } catch (ExpiredProductException e) {
                 e.printStackTrace();
             } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                //System.out.println(e.getMessage());
+                e.printStackTrace();
             }
         }
 
@@ -43,7 +44,8 @@ public class CashDesk implements Serializable {
                 throw new IllegalArgumentException("No such product in inventory!");
             else {
                 if (supermarket.getProductsInventory().get(product) < quantity)
-                    throw new IllegalArgumentException("Not enough quantity of " + product.getName() + " available in inventory!");
+                    throw new IllegalArgumentException("Not enough quantity of " + product.getName() + " available in inventory! Available: "
+                            + supermarket.getProductsInventory().get(product) + "; Wanted: " + quantity);
                 else {
                     int initialQuantity = supermarket.getProductsInventory().get(product);
                     if (initialQuantity - quantity == 0) {
@@ -62,7 +64,8 @@ public class CashDesk implements Serializable {
                 }
             }
         } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
+            //System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 }

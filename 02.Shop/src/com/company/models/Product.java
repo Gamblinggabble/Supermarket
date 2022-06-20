@@ -3,14 +3,13 @@ package com.company.models;
 import com.company.exceptions.ExpiredProductException;
 import com.company.helperClasses.ProductCategory;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class Product implements Serializable {
+public class Product {
 
     private int id;
     private String name;

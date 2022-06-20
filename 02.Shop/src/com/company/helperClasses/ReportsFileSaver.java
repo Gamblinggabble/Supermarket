@@ -13,7 +13,7 @@ public class ReportsFileSaver {
         String date = String.format("%02d-%02d-%4d_%02d-%02d-%02d", dateOfReport.getDayOfMonth(), dateOfReport.getMonthValue(), dateOfReport.getYear(),
                 dateOfReport.getHour(), dateOfReport.getMinute(), dateOfReport.getSecond());
 
-        String filePath = CONSTANTS.pathToStoresDirectories + supermarket.getName() + CONSTANTS.pathToStoreReportsDirectories + date + CONSTANTS.TXT;
+        String filePath = CONFIG.PATH_TO_STORES_DIR + supermarket.getName() + CONFIG.PATH_TO_REPORTS_DIR + date + CONFIG.TXT;
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(getFormattedReport(supermarket, dateOfReport));
@@ -25,7 +25,7 @@ public class ReportsFileSaver {
     public static void readFromFileTxt(String supermarketName, LocalDateTime dateOfReport) {
         String date = String.format("%02d-%02d-%4d_%02d-%02d-%02d", dateOfReport.getDayOfMonth(), dateOfReport.getMonthValue(), dateOfReport.getYear(),
                 dateOfReport.getHour(), dateOfReport.getMinute(), dateOfReport.getSecond());
-        String filePath = CONSTANTS.pathToStoresDirectories + supermarketName + CONSTANTS.pathToStoreReportsDirectories + date + CONSTANTS.TXT;
+        String filePath = CONFIG.PATH_TO_STORES_DIR + supermarketName + CONFIG.PATH_TO_REPORTS_DIR + date + CONFIG.TXT;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
